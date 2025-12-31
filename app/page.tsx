@@ -58,12 +58,14 @@ export default function Home() {
 	};
 
 	const subscribeUser = async () => {
+		console.log("🔔 Starting subscription process...");
 		setLoading(true);
 		setMessage("");
 
 		try {
 			// Check for service worker support
 			if (!("serviceWorker" in navigator)) {
+				console.error("❌ Service workers not supported");
 				setMessage("Service workers are not supported in this browser");
 				setLoading(false);
 				return;
@@ -71,14 +73,30 @@ export default function Home() {
 
 			// Check for push notification support
 			if (!("PushManager" in window)) {
+				console.error("❌ Push notifications not supported");
 				setMessage("Push notifications are not supported in this browser");
 				setLoading(false);
 				return;
 			}
 
+			// Check if Notification API exists
+			if (!("Notification" in window)) {
+				console.error("❌ Notification API not available");
+				setMessage("Notifications are not supported in this browser");
+				setLoading(false);
+				return;
+			}
+
+			console.log("📋 Current permission:", Notification.permission);
+
 			// Request notification permission
+			console.log("🔐 Requesting notification permission...");
 			const permission = await Notification.requestPermission();
+			console.log("📋 Permission result:", permission);
+			console.log("📋 Permission result:", permission);
+
 			if (permission !== "granted") {
+				console.warn("⚠️ Notification permission denied");
 				setMessage(
 					"Notification permission denied. Please allow notifications in your browser settings."
 				);
@@ -87,30 +105,43 @@ export default function Home() {
 			}
 
 			// Wait for service worker to be ready
+			console.log("⏳ Waiting for service worker...");
 			const registration = await navigator.serviceWorker.ready;
+			console.log("✅ Service worker ready:", registration.scope);
 
 			// Get VAPID public key from server
+			console.log("🔑 Fetching VAPID key...");
 			const response = await fetch("/api/push/vapid-public-key");
+			console.log("📡 VAPID key response:", response.status);
+			console.log("📡 VAPID key response:", response.status);
+
 			if (!response.ok) {
+				console.error("❌ Failed to get VAPID key, status:", response.status);
 				throw new Error(
 					"Failed to get VAPID key. Make sure .env.local file is created with your VAPID keys."
 				);
 			}
 
 			const data = await response.json();
+			console.log("🔑 VAPID key received:", data.publicKey ? "✅" : "❌");
+
 			if (!data.publicKey) {
+				console.error("❌ VAPID public key missing in response");
 				throw new Error(
 					"VAPID public key is missing. Please check your .env.local file."
 				);
 			}
 
 			// Subscribe to push notifications
+			console.log("📱 Subscribing to push...");
 			const sub = await registration.pushManager.subscribe({
 				userVisibleOnly: true,
 				applicationServerKey: urlBase64ToUint8Array(data.publicKey),
 			});
+			console.log("✅ Push subscription created:", sub.endpoint);
 
 			// Send subscription to server
+			console.log("💾 Saving subscription to server...");
 			const saveResponse = await fetch("/api/push/subscribe", {
 				method: "POST",
 				headers: {
@@ -118,17 +149,20 @@ export default function Home() {
 				},
 				body: JSON.stringify(sub),
 			});
+			console.log("📡 Save response:", saveResponse.status);
 
 			if (saveResponse.ok) {
+				console.log("✅ Subscription saved successfully!");
 				setSubscription(sub);
 				setIsSubscribed(true);
 				setMessage("Successfully subscribed to notifications!");
 			} else {
 				const errorData = await saveResponse.json().catch(() => ({}));
+				console.error("❌ Failed to save subscription:", errorData);
 				setMessage(errorData.error || "Failed to save subscription");
 			}
 		} catch (error: any) {
-			console.error("Error subscribing:", error);
+			console.error("❌ Error in subscription process:", error);
 			let errorMessage = "Error subscribing to notifications";
 
 			if (error.message) {
@@ -137,10 +171,13 @@ export default function Home() {
 				errorMessage = "Notification permission denied";
 			} else if (error.name === "NotSupportedError") {
 				errorMessage = "Push notifications not supported";
+			} else if (error.name === "AbortError") {
+				errorMessage = "Subscription was cancelled";
 			}
 
 			setMessage(errorMessage);
 		} finally {
+			console.log("🏁 Subscription process complete, resetting loading state");
 			setLoading(false);
 		}
 	};

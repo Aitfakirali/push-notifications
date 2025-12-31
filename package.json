@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npm run add-push-handlers",
     "start": "next start",
     "lint": "next lint",
     "generate-keys": "node scripts/generate-vapid-keys.js",
     "create-icons": "node scripts/create-icons.js",
-    "cron": "node scripts/cron-scheduler.js"
+    "cron": "node scripts/cron-scheduler.js",
+    "add-push-handlers": "node scripts/add-push-handlers.js"
   },
   "dependencies": {
     "next": "^14.2.0",

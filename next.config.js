@@ -1,15 +1,16 @@
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  buildExcludes: [/middleware-manifest\.json$/],
+const withPWA = require("next-pwa")({
+	dest: "public",
+	register: true,
+	skipWaiting: true,
+	disable: false, // Disable PWA in dev to avoid caching issues
+	reloadOnOnline: true,
+	publicExcludes: ["!sw-push.js", "!push-handler.js"], // Don't precache these
+	buildExcludes: [/middleware-manifest\.json$/],
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+	reactStrictMode: true,
 };
 
 module.exports = withPWA(nextConfig);
-
