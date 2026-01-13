@@ -1,36 +1,299 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 My PWA App - Pages Router
 
-## Getting Started
+A clean, simple Progressive Web App built with **Next.js 16 Pages Router** and `@ducanh2912/next-pwa`.
 
-First, run the development server:
+## ✨ Features
+
+- ✅ **PWA Installation** - Installable on desktop and mobile
+- ✅ **Offline Support** - Works without internet connection
+- ✅ **Fast & Reliable** - Optimized performance
+- ✅ **Pages Router** - Classic Next.js routing
+- ✅ **TypeScript** - Type-safe development
+- ✅ **Tailwind CSS** - Modern styling
+
+## 🚀 Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Test PWA Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Desktop
+1. Open the app in Chrome/Edge
+2. Look for the **install icon (➕)** in the address bar
+3. Click it to install
 
-## Learn More
+### Mobile
+1. Open the app in Safari (iOS) or Chrome (Android)
+2. Tap the **Share** button
+3. Select **"Add to Home Screen"**
 
-To learn more about Next.js, take a look at the following resources:
+### Verify Installation
+1. Open **DevTools** (F12)
+2. Go to **Application** tab
+3. Check:
+   - **Manifest** → Shows "Installable" ✅
+   - **Service Workers** → 1 active worker ✅
+   - **Console** → `✅ PWA Service Worker registered: /`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+push-notifications-fresh/
+├── pages/
+│   ├── _app.tsx        ← Service worker registration
+│   ├── _document.tsx   ← PWA metadata
+│   └── index.tsx       ← Homepage
+├── styles/
+│   └── globals.css     ← Global styles with Tailwind
+├── public/
+│   ├── manifest.json   ← PWA manifest
+│   ├── sw.js          ← Generated service worker ✅
+│   ├── icon-192x192.png
+│   └── icon-512x512.png
+├── next.config.ts      ← PWA configuration
+├── tailwind.config.js  ← Tailwind setup
+└── package.json
+```
 
-## Deploy on Vercel
+## 🔧 Key Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### `pages/_app.tsx`
+Registers the service worker on app mount:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+useEffect(() => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("✅ PWA Service Worker registered:", registration.scope);
+      });
+  }
+}, []);
+```
+
+### `pages/_document.tsx`
+Contains PWA metadata and manifest link:
+
+```typescript
+<Head>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon-192x192.png" />
+  <link rel="apple-touch-icon" href="/icon-192x192.png" />
+  <meta name="theme-color" content="#000000" />
+  {/* ... more PWA meta tags */}
+</Head>
+```
+
+### `next.config.ts`
+Configures @ducanh2912/next-pwa:
+
+```typescript
+const withPWA = withPWAInit({
+  dest: "public",
+  register: false, // We register manually in _app.tsx
+  workboxOptions: {
+    skipWaiting: true,
+  },
+});
+```
+
+### `public/manifest.json`
+Defines PWA properties:
+
+```json
+{
+  "name": "My PWA App",
+  "short_name": "PWA App",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "icons": [ /* ... */ ]
+}
+```
+
+## 🎨 Customization
+
+### Change App Name
+1. `public/manifest.json` → Update `name` and `short_name`
+2. `pages/_document.tsx` → Update `apple-mobile-web-app-title`
+3. `pages/index.tsx` → Update page title in `<Head>`
+
+### Change Theme Color
+1. `public/manifest.json` → Update `theme_color` and `background_color`
+2. `pages/_document.tsx` → Update `theme-color` meta tag
+
+### Change Icons
+Replace these files with your own (keep same sizes):
+- `public/icon-192x192.png` (192x192 pixels)
+- `public/icon-512x512.png` (512x512 pixels)
+
+### Update Homepage
+Edit `pages/index.tsx` to customize the UI.
+
+## 📦 Scripts
+
+```bash
+# Development
+npm run dev          # Start dev server (uses Webpack)
+
+# Production
+npm run build        # Build for production
+npm start           # Start production server
+
+# Linting
+npm run lint        # Check code quality
+```
+
+**Note:** We use `--webpack` flag because `@ducanh2912/next-pwa` doesn't support Turbopack yet.
+
+## 🔍 How It Works
+
+### Service Worker Registration
+1. App loads → `pages/_app.tsx` runs
+2. `useEffect` checks for service worker support
+3. Registers `/sw.js` (generated by next-pwa)
+4. Console shows: `✅ PWA Service Worker registered: /`
+
+### PWA Generation
+1. During build, `@ducanh2912/next-pwa` processes your app
+2. Generates `public/sw.js` and `public/workbox-*.js`
+3. Precaches pages and assets
+4. Enables offline functionality
+
+### Installation Flow
+1. User visits your PWA
+2. Browser detects PWA criteria are met
+3. Shows install prompt/icon
+4. User installs → app opens in standalone mode
+
+## 🛠️ Technologies
+
+- **Next.js 16.1.1** - React framework with Pages Router
+- **@ducanh2912/next-pwa 10.2.9** - PWA plugin (maintained fork)
+- **React 19** - UI library
+- **TypeScript 5** - Type safety
+- **Tailwind CSS 3.4** - Utility-first CSS
+- **Workbox** - Service worker utilities
+
+## ✅ PWA Checklist
+
+Your app meets all PWA requirements:
+
+- [x] HTTPS (or localhost for testing)
+- [x] Service worker registered
+- [x] Web app manifest
+- [x] Icons (192x192, 512x512)
+- [x] Start URL defined
+- [x] Display mode: standalone
+- [x] Theme color set
+- [x] Responsive design
+- [x] Works offline (after first visit)
+
+## 🐛 Troubleshooting
+
+### Service Worker Not Registering
+
+**Check Console:** Look for errors in browser console.
+
+**Clear Cache:**
+```bash
+# In DevTools
+Application → Storage → Clear site data
+```
+
+**Rebuild:**
+```bash
+rm -rf .next
+npm run build
+npm start
+```
+
+### Install Prompt Not Showing
+
+**Requirements:**
+- Must be served over HTTPS (or localhost)
+- Service worker must be active
+- Manifest must be valid
+- Must not already be installed
+
+**Check Installability:**
+1. DevTools → Application → Manifest
+2. Look for errors under "Installability"
+
+### Changes Not Reflecting
+
+**Development:** Next.js dev mode disables most SW caching
+
+**Production:**
+```bash
+npm run build
+npm start
+```
+
+### Build Errors
+
+**If you see Webpack errors:**
+- Make sure `--webpack` flag is in build command
+- Check `package.json` scripts
+
+**If TypeScript errors:**
+```bash
+npm run lint
+```
+
+## 📚 Learn More
+
+- [Next.js Pages Router Docs](https://nextjs.org/docs/pages)
+- [@ducanh2912/next-pwa](https://github.com/DuCanhGH/next-pwa)
+- [PWA Documentation](https://web.dev/progressive-web-apps/)
+- [Workbox Documentation](https://developers.google.com/web/tools/workbox)
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+```bash
+npm install -g vercel
+vercel
+```
+
+### Other Platforms
+
+Make sure your hosting:
+- Serves over HTTPS
+- Doesn't block service workers
+- Serves `sw.js` with correct MIME type
+
+## 🎯 Next Steps
+
+This is a **clean PWA foundation**. You can now:
+
+1. ✅ **Customize the UI** - Edit `pages/index.tsx`
+2. ✅ **Add pages** - Create files in `pages/` directory
+3. ✅ **Add components** - Create `components/` directory
+4. ✅ **Add API routes** - Create `pages/api/` directory
+5. 🔔 **Add push notifications** - When you're ready (later)
+
+## 🎉 Success Indicators
+
+When everything works, you'll see:
+
+- ✅ `npm run dev` starts without errors
+- ✅ Page loads at http://localhost:3000
+- ✅ Console shows: `✅ PWA Service Worker registered: /`
+- ✅ DevTools shows manifest and service worker
+- ✅ Install icon appears in browser
+- ✅ App can be installed to home screen
+- ✅ Works in standalone mode after installation
+
+---
+
+**Built with ❤️ using Next.js Pages Router**
