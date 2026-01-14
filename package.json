@@ -4,11 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --webpack",
-		"build": "next build --webpack && node scripts/add-push-handlers.js",
+		"build": "next build --webpack",
 		"start": "next start",
 		"lint": "next lint",
 		"generate-vapid": "node scripts/generate-vapid-keys.js",
-		"add-push-handlers": "node scripts/add-push-handlers.js",
 		"cron": "node scripts/cron-scheduler.js"
 	},
 	"dependencies": {
