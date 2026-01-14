@@ -8,6 +8,7 @@ const withPWA = withPWAInit({
 	workboxOptions: {
 		skipWaiting: true,
 	},
+	buildExcludes: [/dynamic-css-manifest\.json$/],
 });
 
 const nextConfig: NextConfig = {
