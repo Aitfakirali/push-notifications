@@ -5,10 +5,13 @@ const withPWA = withPWAInit({
 	dest: "public",
 	disable: false,
 	register: false, // We'll register manually
+	// IMPORTANT
 	workboxOptions: {
 		skipWaiting: true,
+		clientsClaim: true,
+
+		exclude: [/dynamic-css-manifest\.json$/],
 	},
-	buildExcludes: [/dynamic-css-manifest\.json$/],
 });
 
 const nextConfig: NextConfig = {
